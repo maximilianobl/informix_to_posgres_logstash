@@ -1,0 +1,3 @@
+
+psql -U postgres -w -d postgres -c "select * from public.empleados"
+

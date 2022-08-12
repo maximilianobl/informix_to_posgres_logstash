@@ -1,1 +1,0 @@
-# informix_to_posgres_logstash

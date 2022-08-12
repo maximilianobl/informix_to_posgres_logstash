@@ -1,0 +1,14 @@
+# This file is where you define your pipelines. You can define multiple.
+# For more information on multiple pipelines, see the documentation:
+#   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
+############################### MIGRACION INICIAL (BULK) ######################################
+################## Como es la primera vez no importa orden, son solo insert ###################
+#- pipeline.id: informix_to_postgresql
+#  path.config: "/usr/share/logstash/pipeline/logstash.conf"
+#  pipeline.batch.size: 1000
+  
+################################### POS MIGRACION #############################################
+- pipeline.id: informix_to_postgresql
+  path.config: "/usr/share/logstash/pipeline/ifx_migra_postgres.conf"
+  pipeline.workers: 1
+  pipeline.ordered: true

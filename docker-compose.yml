@@ -1,0 +1,84 @@
+version: '3.6'
+services:
+  logstash:
+    #image: logstash:8.3.1
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    container_name: logstash
+    restart: unless-stopped
+    volumes:
+      #- /home/tomcat/rpm/workers/logs/:/tmp/
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro,Z
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline:ro,Z
+      #- ./logstash/template/:/usr/share/logstash/template:ro,Z
+    ports:
+    - '9600:9600'
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m" 
+      ELS_HOST: ${ELS_HOST}
+      ELS_PASS: ${ELS_PASS}
+      IFX_HOST: ${IFX_HOST}
+      PSG_URL: ${PSG_HOST}:${PSG_PORT}
+      #XPACK_MONITORING_ENABLED: "false"
+    # networks:
+    #   - lgs_db  
+    
+  # BASES DE DATOS
+  postgres:
+    # *-----------------------------*
+    # To connect to the DB: 
+    #   docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DB'
+    #   docker-compose exec postgres bash -c '/docker-entrypoint-initdb.d/schema'
+    #   docker-compose exec postgres bash -c '/docker-entrypoint-initdb.d/select'
+    # *-----------------------------*
+    image: postgres:9.6
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - ${PSG_PORT}:5432
+      #- "127.0.0.1:5432:5432"
+    environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
+    # networks:
+    #  - lgs_db
+    volumes:
+     #- ./data/postgres/postgres_data:/var/lib/postgresql/data
+     - ./data/postgres:/docker-entrypoint-initdb.d/
+
+  informix:
+    # *-----------------------------*
+    # To connect to the DB:
+    #   docker-compose exec informix bash 
+    # *-----------------------------*
+    # Create schema:
+    # docker-compose exec informix bash -c '/docker-entrypoint-initdb.d/esquema.sh'
+    # docker-compose -f docker-compose-db.yml exec informix bash -c '/docker-entrypoint-initdb.d/esquema.sh'
+    # User: informx
+    # Pass: in4mix
+    image: ibmcom/informix-developer-database
+    container_name: informix
+    restart: unless-stopped
+    ports:
+      - 9088:9088
+    environment:
+     - LICENSE=accept     
+    # networks:
+    #  - lgs_db
+    volumes:
+     #- ./data/informix/informix_data:/opt/ibm/data
+     - ./data/informix:/docker-entrypoint-initdb.d/
+
+# networks:
+#   lgs_db:
+#     driver: bridge
+
+volumes:
+  db-leach: {}
+  #postgres_data:
+  #informix_data:
+
+
+

@@ -1,0 +1,63 @@
+
+psql -U postgres -w -d postgres -c "
+CREATE TABLE empleados  ( 
+	id             	SERIAL NOT NULL,
+	nombre         	VARCHAR(50) NOT NULL,
+	apellido       	VARCHAR(50),
+	fechanacimiento	timestamp,
+	update_ts      	timestamp NOT NULL,
+	PRIMARY KEY(id)
+);
+
+CREATE OR REPLACE FUNCTION public.ifx_to_posg_empleados (
+  in_id integer,
+  in_nombre varchar,
+  in_apellido varchar,
+  in_fechanacimiento varchar,
+  in_update_ts varchar,
+  in_nvd_cod varchar,
+  in_nvd_tipo varchar
+)
+RETURNS void AS'
+DECLARE
+  vi_emp_exists INTEGER;
+BEGIN
+
+  SELECT count(id) INTO vi_emp_exists FROM empleados WHERE id = in_id;
+    
+  IF in_nvd_tipo = ''I'' THEN  	
+    IF vi_emp_exists = 0 THEN
+      INSERT INTO public.empleados(id, nombre, apellido, fechanacimiento, update_ts)
+      VALUES (in_id, in_nombre, in_apellido, in_fechanacimiento::timestamp, in_update_ts::timestamp);
+    ELSE
+    	--- ya existe
+    END IF;
+    
+  ELSEIF in_nvd_tipo = ''U'' THEN
+  	--IF vi_emp_exists > 0 AND COALESCE(NULLIF(in_update_ts,''''), ''0'' ) <> ''0'' THEN
+    IF vi_emp_exists > 0 AND COALESCE(in_update_ts, '''') <> '''' THEN
+      UPDATE public.empleados SET 
+      	nombre=in_nombre, apellido=in_apellido, 
+        fechanacimiento=in_fechanacimiento::timestamp, 
+        update_ts=in_update_ts::timestamp 
+      WHERE id = in_id;  
+    ELSE
+    	--- ya existe
+    END IF;
+        
+  ELSEIF in_nvd_tipo = ''D'' THEN 
+  	DELETE FROM empleados WHERE id = in_id; 
+  END IF;
+END;
+'LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+PARALLEL UNSAFE
+COST 100;
+
+ALTER FUNCTION public.ifx_to_posg_empleados (in_id integer, in_nombre varchar, in_apellido varchar, in_fechanacimiento varchar, in_update_ts varchar, in_nvd_cod varchar, in_nvd_tipo varchar)
+  OWNER TO postgres;
+  
+"
+
