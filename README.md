@@ -4,12 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome file</title>
   <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
 
 <body class="stackedit">
-  <div class="stackedit__html"><h1 id="sincronización-de-datos-desde-una-db-informix-hacia-una-db-postgresql"># Sincronización de datos desde una DB Informix hacia una DB PostgreSQL</h1>
+  <div class="stackedit__html"><h1 id="sincronización-de-datos-desde-una-db-informix-hacia-una-db-postgresql">Sincronización de datos desde una DB Informix hacia una DB PostgreSQL</h1>
 <p>Hola! para este proyecto se utilizó <strong>Logstash:8.3.1</strong>, <strong>Informix:14</strong> y <strong>PostgreSQL:9.6</strong>.<br>
 El proyecto esta basado en <em>trigger</em> genéricos para el <em>CDC</em>, estos  eventos son enviados a un Stored procedure para generar las novedades en las tablas correspondientes.<br>
 Luego desde Logstash, se barren las novedades que se encuentan aín sin procesar, se las transforma y envían hacia PostgreSQL.</p>
